@@ -620,11 +620,51 @@
       transition: opacity 0.15s;
     }
     .ig-follow-link:hover { opacity: 0.7; }
-    #instagram-feed behold-widget {
-      display: block;
+    #ig-grid {
       max-width: 1200px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
     }
+    .ig-post {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      display: block;
+      background: var(--tile-alt);
+    }
+    .ig-post img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .ig-post:hover img { transform: scale(1.05); }
+    .ig-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(194, 78, 0, 0.0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      color: #fff;
+      font-size: 28px;
+      opacity: 0;
+    }
+    .ig-post:hover .ig-overlay { background: rgba(194,78,0,0.55); opacity: 1; }
+    .ig-loading {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 40px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--dim);
+      font-family: 'Space Mono', monospace;
+    }
+    @media (max-width: 860px) { #ig-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 500px) { #ig-grid { grid-template-columns: repeat(2, 1fr); } }
 
     /* ── MORE MUSIC ── */
     #more-music {
@@ -950,9 +990,29 @@
     <span class="section-eyebrow" style="margin:0;">@crushthebitrate</span>
     <a href="https://www.instagram.com/crushthebitrate" target="_blank" rel="noopener" class="ig-follow-link">Follow on Instagram →</a>
   </div>
-  <!-- Behold widget — replace YOUR_FEED_ID once you have it -->
-  <behold-widget feed-id="kdgjMPAzxrHFOrOJR6cj"></behold-widget>
-  <script type="module" src="https://w.behold.so/widget.js"></script>
+  <div id="ig-grid">
+    <div class="ig-loading">Loading feed…</div>
+  </div>
+  <script>
+    (async () => {
+      const grid = document.getElementById('ig-grid');
+      try {
+        const res = await fetch('https://feeds.behold.so/kdgjMPAzxrHFOrOJR6cj');
+        const posts = await res.json();
+        const items = (Array.isArray(posts) ? posts : posts.posts || []).slice(0, 12);
+        if (!items.length) throw new Error('empty');
+        grid.innerHTML = items.map(p => `
+          <a href="${p.permalink}" target="_blank" rel="noopener" class="ig-post"
+             title="${(p.caption || '').substring(0, 100)}">
+            <img src="${p.mediaUrl || p.media_url}" alt="Instagram post"
+                 loading="lazy" onerror="this.parentElement.style.display='none'" />
+            <div class="ig-overlay"><span>↗</span></div>
+          </a>`).join('');
+      } catch {
+        grid.innerHTML = '<p class="ig-loading"><a href="https://www.instagram.com/crushthebitrate" target="_blank" rel="noopener" style="color:var(--burnt);">View on Instagram →</a></p>';
+      }
+    })();
+  </script>
 </div>
 
 <!-- SECOND TICKER -->
