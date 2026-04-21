@@ -594,6 +594,38 @@
       color: var(--dim);
     }
 
+    /* ── INSTAGRAM FEED ── */
+    #instagram-feed {
+      background: var(--tile);
+      border-top: 1px solid var(--rule);
+      padding: 48px 60px 64px;
+      max-width: 100%;
+    }
+    .ig-header {
+      max-width: 1200px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ig-follow-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--burnt);
+      text-decoration: none;
+      border-bottom: 1px solid var(--burnt);
+      padding-bottom: 2px;
+      transition: opacity 0.15s;
+    }
+    .ig-follow-link:hover { opacity: 0.7; }
+    #instagram-feed behold-widget {
+      display: block;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     /* ── MORE MUSIC ── */
     #more-music {
       background: var(--ink);
@@ -679,6 +711,8 @@
       #stream, #social, .about-left, .about-right { padding: 56px 24px; }
       #about .inner { grid-template-columns: 1fr; }
       .about-right { display: none; }
+      #instagram-feed { padding: 40px 24px 48px; }
+      .ig-header { flex-direction: column; align-items: flex-start; gap: 10px; }
       #more-music .inner { grid-template-columns: 1fr; }
       .more-left { min-height: 260px; }
       .more-right { padding: 44px 24px; }
@@ -744,21 +778,31 @@
 </div>
 
 <!-- STREAM -->
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  HOW TO UPDATE PLATFORM LINKS                                   ║
+  ║  1. Open distrokid.com/hyperfollow/crushthebitrate/runners-guilt ║
+  ║  2. Click each platform button — copy the URL it opens          ║
+  ║  3. Paste that URL into the matching href="" below              ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
 <section id="stream">
   <div class="section-eyebrow">Listen Now</div>
   <div class="section-title">Pick Your <span>Platform</span></div>
   <div class="platform-grid">
 
+    <!-- PRIMARY — always correct, links to all platforms -->
     <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
        class="platform-btn featured" target="_blank" rel="noopener">
       <span class="p-icon">★</span>
       <div class="p-text">
-        <div class="p-name">Hyperfollow — All Links in One Place</div>
+        <div class="p-name">All Platforms — Hyperfollow</div>
         <div class="p-sub">distrokid.com/hyperfollow/crushthebitrate/runners-guilt</div>
       </div>
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct Apple Music track link -->
     <a href="https://music.apple.com/search?term=runners+guilt+crush+the+bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">🎵</span>
@@ -769,16 +813,7 @@
       <span class="p-arrow">→</span>
     </a>
 
-    <a href="https://itunes.apple.com/search?term=runners+guilt+crush+the+bitrate&entity=song"
-       class="platform-btn" target="_blank" rel="noopener">
-      <span class="p-icon">🎶</span>
-      <div class="p-text">
-        <div class="p-name">iTunes</div>
-        <div class="p-sub">Buy</div>
-      </div>
-      <span class="p-arrow">→</span>
-    </a>
-
+    <!-- UPDATE: replace href with direct Spotify track link -->
     <a href="https://open.spotify.com/search/runners%20guilt%20crush%20the%20bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">🎧</span>
@@ -789,6 +824,7 @@
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct Amazon Music link -->
     <a href="https://music.amazon.com/search/runners+guilt+crush+the+bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">📦</span>
@@ -799,6 +835,7 @@
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct YouTube Music link -->
     <a href="https://music.youtube.com/search?q=runners+guilt+crush+the+bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">▶</span>
@@ -809,6 +846,7 @@
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct Tidal link -->
     <a href="https://listen.tidal.com/search?q=runners+guilt+crush+the+bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">◈</span>
@@ -819,6 +857,7 @@
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct Deezer link -->
     <a href="https://www.deezer.com/search/runners%20guilt%20crush%20the%20bitrate"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">♪</span>
@@ -829,6 +868,7 @@
       <span class="p-arrow">→</span>
     </a>
 
+    <!-- UPDATE: replace href with direct Pandora link -->
     <a href="https://www.pandora.com/search/runners%20guilt%20crush%20the%20bitrate/all"
        class="platform-btn" target="_blank" rel="noopener">
       <span class="p-icon">📻</span>
@@ -861,38 +901,59 @@
       Hyperfollow — Runner's Guilt
     </a>
 
+    <!-- UPDATE: confirm Instagram handle is correct -->
     <a href="https://www.instagram.com/crushthebitrate"
        class="social-btn" target="_blank" rel="noopener">
       <span class="s-icon">📷</span>
       Instagram
     </a>
 
+    <!--
+      ADD MORE SOCIAL BUTTONS — uncomment and update href:
+
     <a href="https://www.tiktok.com/@crushthebitrate"
        class="social-btn" target="_blank" rel="noopener">
-      <span class="s-icon">♪</span>
-      TikTok
-    </a>
-
-    <a href="https://www.facebook.com/crushthebitrate"
-       class="social-btn" target="_blank" rel="noopener">
-      <span class="s-icon">f</span>
-      Facebook
+      <span class="s-icon">♪</span> TikTok
     </a>
 
     <a href="https://twitter.com/crushthebitrate"
        class="social-btn" target="_blank" rel="noopener">
-      <span class="s-icon">✕</span>
-      Twitter / X
+      <span class="s-icon">✕</span> Twitter / X
     </a>
 
-    <a href="https://open.spotify.com/search/crush%20the%20bitrate"
+    <a href="https://www.facebook.com/crushthebitrate"
        class="social-btn" target="_blank" rel="noopener">
-      <span class="s-icon">🎧</span>
-      Spotify
+      <span class="s-icon">f</span> Facebook
     </a>
+
+    <a href="https://www.youtube.com/@crushthebitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">▶</span> YouTube
+    </a>
+    -->
 
   </div>
 </section>
+
+<!-- INSTAGRAM FEED -->
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  INSTAGRAM FEED SETUP (free, ~5 min)                           ║
+  ║  1. Go to behold.so → free account                             ║
+  ║  2. Connect your @crushthebitrate Instagram                    ║
+  ║  3. Create a feed → copy the Feed ID (looks like: abc123xyz)   ║
+  ║  4. Replace YOUR_FEED_ID below with that ID                    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
+<div id="instagram-feed">
+  <div class="ig-header">
+    <span class="section-eyebrow" style="margin:0;">@crushthebitrate</span>
+    <a href="https://www.instagram.com/crushthebitrate" target="_blank" rel="noopener" class="ig-follow-link">Follow on Instagram →</a>
+  </div>
+  <!-- Behold widget — replace YOUR_FEED_ID once you have it -->
+  <behold-widget feed-id="YOUR_FEED_ID"></behold-widget>
+  <script type="module" src="https://w.behold.so/widget.js"></script>
+</div>
 
 <!-- SECOND TICKER -->
 <div class="ticker-wrap dark">
