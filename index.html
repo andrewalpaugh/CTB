@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crush the Bitrate — Runner's Guilt</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Antonio:wght@400;700&family=Permanent+Marker&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0e8d4;
+      --tile:      #e6ddc6;
+      --tile-alt:  #ddd4ba;
+      --blue:      #1560d4;
+      --blue-lt:   #2e6ec9;
+      --burnt:     #c24e00;
+      --burnt-dk:  #9e3e00;
+      --yellow:    #e8c800;
+      --yellow-dk: #c9aa00;
+      --ink:       #1c1408;
+      --ink-mid:   #4a3c28;
+      --dim:       #8a7a60;
+      --white:     #ffffff;
+      --rule:      rgba(28,20,8,0.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='1' height='1' fill='%231c1408' fill-opacity='0.03'/%3E%3C/svg%3E");
+      color: var(--ink);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.015) 2px,
+        rgba(0,0,0,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--blue);
+      border-bottom: 4px solid var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 62px;
+    }
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo-block img {
+      height: 46px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.4));
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    nav a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 0 18px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      border-left: 1px solid rgba(255,255,255,0.15);
+      transition: background 0.15s, color 0.15s;
+    }
+    nav a:hover { background: rgba(0,0,0,0.2); color: var(--yellow); }
+    nav a.cta {
+      background: var(--yellow);
+      color: #000;
+      font-weight: 700;
+      border-left: none;
+      padding: 0 22px;
+    }
+    nav a.cta:hover { background: #fff; }
+
+    /* ── HERO ── */
+    #hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 62px);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left {
+      position: relative;
+      background: var(--tile-alt);
+      display: flex;
+      align-items: stretch;
+    }
+    .hero-left img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.9) contrast(1.05);
+    }
+    .hero-left::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        transparent 60%,
+        var(--blue) 60%,
+        var(--blue) 63%,
+        transparent 63%
+      );
+      pointer-events: none;
+    }
+    .hero-right {
+      background: var(--tile);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 52px;
+      position: relative;
+      border-left: 5px solid var(--burnt);
+    }
+    .hero-right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 18px,
+        rgba(28,20,8,0.025) 18px,
+        rgba(28,20,8,0.025) 19px
+      );
+      pointer-events: none;
+    }
+    .hero-right .tag {
+      display: inline-block;
+      background: var(--burnt);
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      margin-bottom: 22px;
+      align-self: flex-start;
+    }
+    .hero-right h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 9vw, 130px);
+      line-height: 0.88;
+      letter-spacing: 2px;
+      color: var(--ink);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-right h1 em {
+      display: block;
+      color: var(--burnt);
+      font-style: normal;
+    }
+    .hero-right .artist-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-right .blurb {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--ink-mid);
+      max-width: 360px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+      font-weight: 400;
+    }
+    .hero-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-loud {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--burnt);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 3px;
+      text-decoration: none;
+      padding: 14px 32px;
+      border: none;
+      outline: 4px solid transparent;
+      outline-offset: 0;
+      transition: outline-color 0.15s, transform 0.1s, background 0.15s;
+    }
+    .btn-loud:hover {
+      background: var(--burnt-dk);
+      outline: 4px solid var(--ink);
+      transform: translate(-2px, -2px);
+    }
+    .btn-flat {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--ink-mid);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 11px 20px;
+      border: 1px solid var(--rule);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-flat:hover {
+      border-color: var(--burnt);
+      color: var(--burnt);
+    }
+
+    /* ── TICKER ── */
+    .ticker-wrap {
+      background: var(--burnt);
+      border-top: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      overflow: hidden;
+      padding: 8px 0;
+    }
+    .ticker-inner {
+      display: inline-block;
+      white-space: nowrap;
+      animation: tick 28s linear infinite;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 4px;
+      color: #fff;
+    }
+    @keyframes tick {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── STREAM SECTION ── */
+    #stream {
+      padding: 80px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--burnt);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 58px;
+      letter-spacing: 3px;
+      color: var(--ink);
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      line-height: 1;
+    }
+    .section-title span { color: var(--burnt); }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 3px;
+      background: var(--rule);
+    }
+    .platform-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 22px;
+      background: var(--tile);
+      border: none;
+      text-decoration: none;
+      color: var(--ink);
+      transition: background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .platform-btn::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--blue);
+      transition: width 0.2s;
+    }
+    .platform-btn:hover { background: var(--tile-alt); }
+    .platform-btn:hover::before { width: 5px; background: var(--burnt); }
+    .platform-btn .p-icon {
+      font-size: 22px;
+      width: 36px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .platform-btn .p-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .platform-btn .p-sub {
+      font-size: 10px;
+      color: var(--dim);
+      margin-top: 3px;
+      letter-spacing: 1px;
+    }
+    .platform-btn .p-arrow {
+      margin-left: auto;
+      color: var(--dim);
+      font-size: 14px;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .platform-btn:hover .p-arrow {
+      color: var(--burnt);
+      transform: translateX(3px);
+    }
+    .platform-btn.featured {
+      grid-column: 1 / -1;
+      background: var(--blue);
+      justify-content: center;
+      padding: 24px;
+      gap: 18px;
+    }
+    .platform-btn.featured::before { display: none; }
+    .platform-btn.featured:hover { background: #1a72e8; }
+    .platform-btn.featured .p-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      letter-spacing: 4px;
+      color: var(--yellow);
+    }
+    .platform-btn.featured .p-sub { color: rgba(255,255,255,0.7); }
+    .platform-btn.featured .p-arrow { color: var(--yellow); font-size: 20px; }
+
+    /* ── MIDDLE ART BREAK ── */
+    .art-break {
+      position: relative;
+      height: 280px;
+      overflow: hidden;
+      border-top: 4px solid var(--burnt);
+      border-bottom: 4px solid var(--burnt);
+      background: var(--ink);
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 22px,
+        rgba(255,255,255,0.03) 22px,
+        rgba(255,255,255,0.03) 23px
+      );
+    }
+    .art-break .overlay-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+    .art-break .overlay-text p {
+      font-family: 'Permanent Marker', cursive;
+      font-size: clamp(32px, 5vw, 68px);
+      color: #fff;
+      line-height: 1.1;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.6);
+      max-width: 700px;
+    }
+    .art-break .overlay-text p em {
+      color: var(--yellow);
+      font-style: normal;
+    }
+
+    /* ── SOCIAL ── */
+    #social {
+      padding: 80px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .social-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 28px 16px;
+      border: 2px solid var(--rule);
+      background: var(--tile);
+      color: var(--ink);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: border-color 0.15s, background 0.15s, transform 0.12s;
+    }
+    .social-btn:hover {
+      border-color: var(--burnt);
+      background: var(--tile-alt);
+      transform: translateY(-3px);
+    }
+    .social-btn .s-icon { font-size: 28px; }
+    .social-btn.hyperfollow-card {
+      grid-column: span 2;
+      flex-direction: row;
+      padding: 24px 32px;
+      background: var(--burnt);
+      border-color: var(--burnt);
+      font-size: 14px;
+      letter-spacing: 3px;
+      font-family: 'Bebas Neue', sans-serif;
+      color: #fff;
+      gap: 14px;
+      justify-content: center;
+    }
+    .social-btn.hyperfollow-card:hover {
+      background: var(--burnt-dk);
+      border-color: var(--burnt-dk);
+      transform: translateY(-3px);
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      background: var(--tile);
+      border-top: 5px solid var(--blue);
+    }
+    #about .inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .about-left {
+      padding: 80px 60px;
+      border-right: 3px solid var(--rule);
+    }
+    .about-right {
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .about-right img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      filter: saturate(0.85);
+      border: 3px solid var(--rule);
+      margin-bottom: 0;
+    }
+    #about p {
+      font-size: 13px;
+      line-height: 1.9;
+      color: var(--ink-mid);
+      margin-bottom: 18px;
+      font-weight: 400;
+    }
+    .meta-table {
+      margin-top: 32px;
+      border-top: 1px solid var(--rule);
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .meta-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .meta-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: var(--ink);
+    }
+    .meta-val.hot { color: var(--burnt); }
+
+    /* ── SECOND TICKER ── */
+    .ticker-wrap.dark {
+      background: var(--blue);
+      border-color: var(--blue-lt);
+    }
+    .ticker-wrap.dark .ticker-inner {
+      color: var(--yellow);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--tile-alt);
+      border-top: 4px solid var(--blue);
+      padding: 50px 60px 36px;
+      text-align: center;
+    }
+    .footer-logo-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .footer-logo-area img {
+      height: 64px;
+      width: auto;
+      max-width: 320px;
+      display: block;
+    }
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    footer .footer-links a {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      padding: 14px 20px;
+      border-right: 1px solid var(--rule);
+      transition: color 0.15s;
+    }
+    footer .footer-links a:first-child { border-left: 1px solid var(--rule); }
+    footer .footer-links a:hover { color: var(--burnt); }
+    footer .copy {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--dim);
+    }
+
+    /* ── MORE MUSIC ── */
+    #more-music {
+      background: var(--ink);
+      border-top: 5px solid var(--burnt);
+      border-bottom: 5px solid var(--burnt);
+    }
+    #more-music .inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .more-left {
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .more-left img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .more-left:hover img { transform: scale(1.03); }
+    .more-right {
+      padding: 70px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 3px solid rgba(255,255,255,0.08);
+    }
+    .more-right .catalog-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: var(--burnt);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .more-right h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 88px);
+      line-height: 0.9;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .more-right h2 em {
+      display: block;
+      color: var(--burnt);
+      font-style: normal;
+    }
+    .more-right p {
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.5);
+      max-width: 340px;
+      margin-bottom: 36px;
+    }
+    /* promo strip of photos */
+    .photo-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 3px;
+      background: rgba(255,255,255,0.05);
+    }
+    .photo-strip img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.8);
+      transition: filter 0.2s, transform 0.2s;
+    }
+    .photo-strip img:hover { filter: saturate(1.1); transform: scale(1.02); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      #hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { height: 55vw; max-height: 420px; }
+      .hero-right { padding: 44px 28px; border-left: none; border-top: 5px solid var(--burnt); }
+      #stream, #social, .about-left, .about-right { padding: 56px 24px; }
+      #about .inner { grid-template-columns: 1fr; }
+      .about-right { display: none; }
+      #more-music .inner { grid-template-columns: 1fr; }
+      .more-left { min-height: 260px; }
+      .more-right { padding: 44px 24px; }
+      .photo-strip { grid-template-columns: 1fr 1fr 1fr; }
+      .section-title { font-size: 42px; }
+      nav a { display: none; }
+      nav a.cta { display: flex; }
+      footer { padding: 40px 24px 28px; }
+      .social-btn.hyperfollow-card { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-block">
+    <img src="./CTB Assets/white logo.png" alt="Crush the Bitrate" />
+  </div>
+  <nav>
+    <a href="#stream">Listen</a>
+    <a href="#social">Follow</a>
+    <a href="#more-music">More Music</a>
+    <a href="#about">About</a>
+    <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
+       class="cta" target="_blank" rel="noopener">▶ Hyperfollow</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <img src="./runnersguilt.jpg" alt="Runner's Guilt" />
+  </div>
+  <div class="hero-right">
+    <div class="tag">✦ New Single — Out Now</div>
+    <h1>
+      Runner's<br>
+      <em>Guilt</em>
+    </h1>
+    <div class="artist-name">Crush the Bitrate</div>
+    <p class="blurb">
+      Raw signal. No apologies. The new single is here — stream it everywhere, follow along, and turn it up.
+    </p>
+    <div class="hero-btns">
+      <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
+         class="btn-loud" target="_blank" rel="noopener">
+        ▶ &nbsp;Stream Now
+      </a>
+      <a href="#stream" class="btn-flat">↓ &nbsp;All Platforms</a>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    ✦ Runner's Guilt &nbsp;·&nbsp; Crush the Bitrate &nbsp;·&nbsp; Out Now &nbsp;·&nbsp; Stream Everywhere &nbsp;·&nbsp;
+    ✦ Runner's Guilt &nbsp;·&nbsp; Crush the Bitrate &nbsp;·&nbsp; Out Now &nbsp;·&nbsp; Stream Everywhere &nbsp;·&nbsp;
+    ✦ Runner's Guilt &nbsp;·&nbsp; Crush the Bitrate &nbsp;·&nbsp; Out Now &nbsp;·&nbsp; Stream Everywhere &nbsp;·&nbsp;
+    ✦ Runner's Guilt &nbsp;·&nbsp; Crush the Bitrate &nbsp;·&nbsp; Out Now &nbsp;·&nbsp; Stream Everywhere &nbsp;·&nbsp;
+  </div>
+</div>
+
+<!-- STREAM -->
+<section id="stream">
+  <div class="section-eyebrow">Listen Now</div>
+  <div class="section-title">Pick Your <span>Platform</span></div>
+  <div class="platform-grid">
+
+    <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
+       class="platform-btn featured" target="_blank" rel="noopener">
+      <span class="p-icon">★</span>
+      <div class="p-text">
+        <div class="p-name">Hyperfollow — All Links in One Place</div>
+        <div class="p-sub">distrokid.com/hyperfollow/crushthebitrate/runners-guilt</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://music.apple.com/search?term=runners+guilt+crush+the+bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">🎵</span>
+      <div class="p-text">
+        <div class="p-name">Apple Music</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://itunes.apple.com/search?term=runners+guilt+crush+the+bitrate&entity=song"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">🎶</span>
+      <div class="p-text">
+        <div class="p-name">iTunes</div>
+        <div class="p-sub">Buy</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://open.spotify.com/search/runners%20guilt%20crush%20the%20bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">🎧</span>
+      <div class="p-text">
+        <div class="p-name">Spotify</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://music.amazon.com/search/runners+guilt+crush+the+bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">📦</span>
+      <div class="p-text">
+        <div class="p-name">Amazon Music</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://music.youtube.com/search?q=runners+guilt+crush+the+bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">▶</span>
+      <div class="p-text">
+        <div class="p-name">YouTube Music</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://listen.tidal.com/search?q=runners+guilt+crush+the+bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">◈</span>
+      <div class="p-text">
+        <div class="p-name">Tidal</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://www.deezer.com/search/runners%20guilt%20crush%20the%20bitrate"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">♪</span>
+      <div class="p-text">
+        <div class="p-name">Deezer</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+    <a href="https://www.pandora.com/search/runners%20guilt%20crush%20the%20bitrate/all"
+       class="platform-btn" target="_blank" rel="noopener">
+      <span class="p-icon">📻</span>
+      <div class="p-text">
+        <div class="p-name">Pandora</div>
+        <div class="p-sub">Stream</div>
+      </div>
+      <span class="p-arrow">→</span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ART BREAK -->
+<div class="art-break">
+  <div class="overlay-text">
+    <p>"Turn it up.<br><em>Runner's Guilt</em> is out now."</p>
+  </div>
+</div>
+
+<!-- SOCIAL -->
+<section id="social">
+  <div class="section-eyebrow">Stay Connected</div>
+  <div class="section-title">Follow <span>Along</span></div>
+  <div class="social-grid">
+
+    <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
+       class="social-btn hyperfollow-card" target="_blank" rel="noopener">
+      <span class="s-icon">★</span>
+      Hyperfollow — Runner's Guilt
+    </a>
+
+    <a href="https://www.instagram.com/crushthebitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">📷</span>
+      Instagram
+    </a>
+
+    <a href="https://www.tiktok.com/@crushthebitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">♪</span>
+      TikTok
+    </a>
+
+    <a href="https://www.facebook.com/crushthebitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">f</span>
+      Facebook
+    </a>
+
+    <a href="https://twitter.com/crushthebitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">✕</span>
+      Twitter / X
+    </a>
+
+    <a href="https://open.spotify.com/search/crush%20the%20bitrate"
+       class="social-btn" target="_blank" rel="noopener">
+      <span class="s-icon">🎧</span>
+      Spotify
+    </a>
+
+  </div>
+</section>
+
+<!-- SECOND TICKER -->
+<div class="ticker-wrap dark">
+  <div class="ticker-inner">
+    · Crush the Bitrate · Runner's Guilt · Add to Playlist · Share with a Friend · Stream Now · Tell Someone · Crush the Bitrate · Runner's Guilt · Add to Playlist · Share with a Friend · Stream Now · Tell Someone ·
+  </div>
+</div>
+
+<!-- MORE MUSIC -->
+<section id="more-music">
+  <div class="inner">
+    <div class="more-left">
+      <img src="./CTB Assets/not in this life main cover.jpg" alt="Not in This Life" />
+    </div>
+    <div class="more-right">
+      <div class="catalog-num">CTB · 002</div>
+      <h2>Not in<br><em>This Life</em></h2>
+      <p>
+        The previous single. Dark, glitchy, and built to haunt you. If you're just finding out about Crush the Bitrate — start here, then go to Runner's Guilt.
+      </p>
+      <a href="https://open.spotify.com/search/not%20in%20this%20life%20crush%20the%20bitrate"
+         class="btn-loud" target="_blank" rel="noopener"
+         style="background:var(--burnt); font-size:18px;">▶ &nbsp;Listen</a>
+    </div>
+  </div>
+</section>
+
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  ADD A NEW RELEASE — copy this block and paste above    ║
+  ║  the ABOUT section. Update the 3 fields marked below.   ║
+  ╚══════════════════════════════════════════════════════════╝
+
+<section id="more-music">
+  <div class="inner">
+    <div class="more-left">
+      <img src="./CTB Assets/YOUR-COVER-ART.jpg" alt="Release Title" />   ← cover image
+    </div>
+    <div class="more-right">
+      <div class="catalog-num">CTB · 003</div>                              ← catalog number
+      <h2>Release<br><em>Title</em></h2>                                    ← song title
+      <p>One or two sentences about the track.</p>
+      <a href="STREAMING-URL" class="btn-loud" target="_blank" rel="noopener"
+         style="background:var(--burnt); font-size:18px;">▶ &nbsp;Listen</a>
+    </div>
+  </div>
+</section>
+-->
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="inner">
+    <div class="about-left">
+      <div class="section-eyebrow">The Artist</div>
+      <div class="section-title" style="font-size:48px;">Crush the<br><span>Bitrate</span></div>
+      <p>
+        Independent. Unfiltered. Built for the headphone kids and the late-night drivers. Crush the Bitrate makes music that hits harder than the algorithm wants it to.
+      </p>
+      <p>
+        "Runner's Guilt" is the latest single — a snapshot of movement, doubt, and not looking back. Stream it on every platform. Buy it if you love it. Add it to a playlist if you want to share it.
+      </p>
+      <div class="meta-table">
+        <div class="meta-row">
+          <span class="meta-label">Title</span>
+          <span class="meta-val">Runner's Guilt</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Artist</span>
+          <span class="meta-val">Crush the Bitrate</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Format</span>
+          <span class="meta-val">Single</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Status</span>
+          <span class="meta-val hot">Out Now ✦</span>
+        </div>
+      </div>
+      <div style="margin-top:36px;">
+        <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt"
+           class="btn-loud" target="_blank" rel="noopener">▶ &nbsp;Listen Now</a>
+      </div>
+    </div>
+    <div class="about-right">
+      <img src="./runnersguilt.jpg" alt="Runner's Guilt" />
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-area">
+    <img src="./CTB Assets/bluelogo.png" alt="Crush the Bitrate" />
+  </div>
+  <div class="footer-links">
+    <a href="https://distrokid.com/hyperfollow/crushthebitrate/runners-guilt" target="_blank" rel="noopener">Hyperfollow</a>
+    <a href="https://music.apple.com/search?term=runners+guilt+crush+the+bitrate" target="_blank" rel="noopener">Apple Music</a>
+    <a href="https://open.spotify.com/search/runners%20guilt%20crush%20the%20bitrate" target="_blank" rel="noopener">Spotify</a>
+    <a href="https://www.instagram.com/crushthebitrate" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.tiktok.com/@crushthebitrate" target="_blank" rel="noopener">TikTok</a>
+  </div>
+  <p class="copy">© 2025 Crush the Bitrate · All Rights Reserved</p>
+</footer>
+
+</body>
+</html>
